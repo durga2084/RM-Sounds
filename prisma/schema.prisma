@@ -1,0 +1,146 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model OrganizationLocations {
+  LocationID        Int                          @id @default(autoincrement())
+  LocationManager   String?                      @db.VarChar(100)
+  ContactNumber     String                       @db.VarChar(20)
+  ContactEmail      String                       @db.VarChar(100)
+  FullAddress       String                       @db.Text
+  GoogleMapEmbedUrl String?                      @db.Text
+  LocationType      String                       @db.VarChar(30)
+  Status            OrganizationLocations_Status @default(Active)
+  CreatedAt         DateTime                     @db.DateTime(0)
+  CreatedBy         String                       @db.VarChar(100)
+  UpdatedAt         DateTime?                    @db.DateTime(0)
+  UpdatedBy         String?                      @db.VarChar(100)
+}
+
+model WebsiteGallery {
+  GalleryImageID Int      @id @default(autoincrement())
+  ImageFileName  String   @db.Text
+  ImageUrl       String   @db.Text
+  CreatedAt      DateTime @db.DateTime(0)
+  CreatedBy      String   @db.VarChar(20)
+
+  @@map("WebsiteGallery")
+}
+
+model EventBookings {
+  BookingID     Int                  @id @default(autoincrement())
+  BookingNo     String               @unique(map: "BookingNo") @db.VarChar(20)
+  CustomerName  String               @db.VarChar(50)
+  MobileNumber  String               @db.VarChar(20)
+  EventType     Int
+  EventDate     DateTime             @db.Date
+  EventEndDate  DateTime             @db.Date
+  EventLocation String               @db.Text
+  Notes         String               @db.Text
+  BookingStatus EventBookings_Status @default(Pending)
+  CreatedAt     DateTime             @db.DateTime(0)
+  CreatedBy     String               @db.VarChar(50)
+  UpdatedAt     DateTime?            @db.DateTime(0)
+  UpdatedBy     String?              @db.VarChar(20)
+
+  @@index([BookingStatus], map: "BookingStatus")
+  @@index([EventDate], map: "EventDate")
+  @@map("EventBookings")
+}
+
+model EventTypes {
+  EventTypeID   Int               @id @default(autoincrement())
+  EventTypeName String            @unique(map: "EventTypeName") @db.VarChar(100)
+  EventShortKey String            @unique(map: "EventShortKey") @db.Char(3)
+  Status        EventTypes_Status @default(Active)
+  CreatedAt     DateTime          @db.DateTime(0)
+  CreatedBy     String            @db.VarChar(50)
+  UpdatedAt     DateTime?         @db.DateTime(0)
+  UpdatedBy     String?           @db.VarChar(50)
+
+  @@map("EventTypes")
+}
+
+model EventCalendar {
+  CalendarID          Int                               @id @default(autoincrement())
+  EventDate           DateTime                          @db.Date
+  BookingAvailability EventCalendar_BookingAvailability
+  Remarks             String?                           @db.VarChar(150)
+  CreatedAt           DateTime                          @db.DateTime(0)
+  CreatedBy           String                            @db.VarChar(50)
+  UpdatedAt           DateTime?                         @db.DateTime(0)
+  UpdatedBy           String?                           @db.VarChar(50)
+
+  @@map("EventCalendar")
+}
+
+model WhatsappNumber {
+  WhatsappNumberID Int      @id @default(autoincrement())
+  WhatsappNumber   String   @db.VarChar(20)
+  CreatedAt        DateTime @db.DateTime(0)
+  CreatedBy        String   @db.VarChar(50)
+}
+
+model AdminLogins {
+  AdminLoginID  Int      @id @default(autoincrement())
+  AdminUsername String   @db.VarChar(100)
+  AdminPassword String   @db.VarChar(100)
+  CreatedAt     DateTime @db.DateTime(0)
+  CreatedBy     String   @db.VarChar(50)
+}
+
+model AdminLogTimings {
+  LogTimingsID Int                       @id @default(autoincrement())
+  UserName     String                    @db.VarChar(50)
+  LogStatus    AdminLogTimings_LogStatus
+  LoginAt      DateTime?                 @db.DateTime(0)
+  LogoutAt     DateTime?                 @db.DateTime(0)
+  CreatedAt    DateTime                  @db.DateTime(0)
+}
+
+model AdminSessions {
+  SessionID    Int       @id @default(autoincrement())
+  AdminLoginID Int
+  Token        String    @db.Text
+  DeviceInfo   String    @db.VarChar(200)
+  IPAddress    String    @db.VarChar(50)
+  IsActive     Boolean
+  CreatedAt    DateTime  @db.DateTime(0)
+  ExpiresAt    DateTime? @db.DateTime(0)
+
+  @@map("AdminSessions")
+}
+
+enum OrganizationLocations_Status {
+  Active
+  Inactive
+}
+
+enum EventBookings_Status {
+  Pending
+  Accepted
+  Rejected
+  Cancelled
+  Completed
+}
+
+enum EventTypes_Status {
+  Active
+  Inactive
+}
+
+enum EventCalendar_BookingAvailability {
+  Available
+  PartiallyBooked
+  FullyBooked
+}
+
+enum AdminLogTimings_LogStatus {
+  Login
+  Logout
+}

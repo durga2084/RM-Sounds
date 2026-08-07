@@ -1,0 +1,380 @@
+/* ==========================================================
+   CLIENT WEBSITE STYLES
+   Used only by the public website.
+   Import this file in app/(client)/layout.tsx
+   ========================================================== */
+
+/* ============================================
+   SOUND WAVES (Pulsing Rings + Equalizer)
+   ============================================ */
+
+.sound-wave {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  overflow: hidden;
+}
+
+.sound-wave .ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  animation: pulse-ring 4s ease-out infinite;
+}
+
+.sound-wave .ring:nth-child(1) {
+  width: 30%;
+  height: 30%;
+  animation-delay: 0s;
+}
+
+.sound-wave .ring:nth-child(2) {
+  width: 50%;
+  height: 50%;
+  animation-delay: 1s;
+}
+
+.sound-wave .ring:nth-child(3) {
+  width: 70%;
+  height: 70%;
+  animation-delay: 2s;
+}
+
+.sound-wave .ring:nth-child(4) {
+  width: 90%;
+  height: 90%;
+  animation-delay: 3s;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.6;
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0;
+  }
+}
+
+/* ============================================
+   Equalizer Bars
+   ============================================ */
+
+.eq-bars {
+  position: absolute;
+  bottom: 10%;
+  left: 10%;
+  width: 80%;
+  height: 20%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  gap: 4px;
+  z-index: 6;
+  pointer-events: none;
+  opacity: 0.3;
+}
+
+.eq-bars .bar {
+  flex: 1;
+  background: linear-gradient(to top, #4158d0, #c850c0);
+  border-radius: 2px;
+  animation: eq-bounce 0.8s ease-in-out infinite alternate;
+}
+
+.eq-bars .bar:nth-child(odd) {
+  animation-delay: 0.1s;
+  height: 40%;
+}
+
+.eq-bars .bar:nth-child(even) {
+  animation-delay: 0.4s;
+  height: 70%;
+}
+
+.eq-bars .bar:nth-child(3n) {
+  animation-delay: 0.2s;
+  height: 60%;
+}
+
+.eq-bars .bar:nth-child(5n) {
+  animation-delay: 0.6s;
+  height: 30%;
+}
+
+@keyframes eq-bounce {
+  0% {
+    transform: scaleY(0.4);
+  }
+
+  100% {
+    transform: scaleY(1);
+  }
+}
+
+/* ============================================
+   LED Grid
+   ============================================ */
+
+.led-grid {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  gap: 6px;
+  padding: 8%;
+  opacity: 0.25;
+}
+
+.led-grid .dot {
+  border-radius: 50%;
+  background: radial-gradient(circle, #ff512f, #dd2476, #4158d0);
+  filter: blur(1px);
+  animation: led-flicker 1.5s ease-in-out infinite alternate;
+}
+
+.led-grid .dot:nth-child(odd) {
+  animation-delay: 0.2s;
+  background: radial-gradient(circle, #4158d0, #c850c0);
+}
+
+.led-grid .dot:nth-child(3n) {
+  animation-delay: 0.7s;
+  background: radial-gradient(circle, #ff512f, #dd2476);
+}
+
+.led-grid .dot:nth-child(5n) {
+  animation-delay: 1.2s;
+  background: radial-gradient(circle, #dd2476, #ff512f);
+}
+
+@keyframes led-flicker {
+  0% {
+    opacity: 0.2;
+    transform: scale(0.8);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+/* ============================================
+   Road Show Animation
+   ============================================ */
+
+.road-effect {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.road-lines {
+  position: absolute;
+  bottom: 15%;
+  left: 0;
+  width: 200%;
+  height: 4px;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.3) 0,
+    rgba(255, 255, 255, 0.3) 30px,
+    transparent 30px,
+    transparent 60px
+  );
+  animation: move-road 3s linear infinite;
+}
+
+.road-lines::after {
+  content: "";
+  position: absolute;
+  bottom: 20px;
+  left: -50px;
+  width: 60px;
+  height: 30px;
+  background: rgba(255, 255, 255, 0.2);
+  clip-path: polygon(
+    0 30%,
+    30% 0,
+    70% 0,
+    100% 30%,
+    100% 70%,
+    70% 100%,
+    30% 100%,
+    0 70%
+  );
+  animation: truck-move 6s linear infinite;
+}
+
+@keyframes move-road {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes truck-move {
+  0% {
+    left: -60px;
+    opacity: 0.2;
+  }
+
+  10%,
+  90% {
+    opacity: 0.6;
+  }
+
+  100% {
+    left: 110%;
+    opacity: 0;
+  }
+}
+
+/* ============================================
+   Gradient Animation Utility
+   ============================================ */
+
+@keyframes gradient-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient-flow {
+  background-size: 200% auto;
+  animation: gradient-flow 3s ease infinite;
+}
+
+/* ============================================
+   React Day Picker
+   ============================================ */
+
+.rdp {
+  --rdp-cell-size: 52px;
+  --rdp-accent-color: #4158d0;
+  --rdp-background-color: transparent;
+  color: white;
+}
+
+.rdp-months {
+  justify-content: center;
+}
+
+.rdp-table {
+  border-collapse: separate !important;
+  border-spacing: 8px;
+}
+
+.rdp-cell {
+  padding: 0;
+}
+
+.rdp-day {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  border: none;
+  font-weight: 600;
+  transition: all 0.25s ease;
+}
+
+.rdp-day:hover:not([disabled]) {
+  background: rgba(255, 255, 255, 0.08);
+  transform: scale(1.05);
+}
+
+.rdp-day_selected {
+  background: linear-gradient(90deg, #4158d0, #c850c0, #ff512f);
+  color: white;
+}
+
+.rdp-day_disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.rdp-day_outside {
+  opacity: 0.2;
+}
+
+.rdp-day:focus-visible {
+  outline: 2px solid #4158d0;
+  outline-offset: 2px;
+}
+
+.rdp-head_cell {
+  color: #888;
+  font-weight: 700;
+  padding-bottom: 12px;
+}
+
+.rdp-caption_label {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.rdp-nav_button {
+  color: white;
+  transition: all 0.2s ease;
+}
+
+.rdp-nav_button:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ============================================
+   Booking Status
+   ============================================ */
+
+.calendar-available {
+  background: rgba(39, 84, 43, 0.87) !important;
+  color: white;
+  border: none !important;
+}
+
+.calendar-available:hover {
+  background: rgba(26, 123, 62, 0.25) !important;
+}
+
+.calendar-full {
+  background: #671515 !important;
+  color: white !important;
+  border: none !important;
+}
+
+.calendar-full:hover {
+  background: #9f4f4f !important;
+}
+
+.calendar-partial {
+  background: #facc15 !important;
+  color: #111827 !important;
+  border: none !important;
+}
+
+.calendar-partial:hover {
+  background: #eab308 !important;
+}
