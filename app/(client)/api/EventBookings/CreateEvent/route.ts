@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { EventBookings_Status, EventTypes_Status } from "@prisma/client";
+import {
+  EventBookings_Status,
+  EventTypes_Status,
+  FcmSubscriptions_AppRole,
+} from "@prisma/client";
+import { sendPushNotification } from "@/services/PushNotificationService";
 
 function generateRandomDigits(): string {
   return Math.floor(1000 + Math.random() * 9000).toString();
@@ -235,6 +240,53 @@ export async function POST(request: NextRequest) {
         CreatedAt: true,
       },
     });
+
+    try {
+      const customerSubscriptions = await prisma.fcmSubscriptions.findMany({
+        where: {
+          AppRole: FcmSubscriptions_AppRole.Customer,
+          CustomerMobile: mobileNumber,
+        },
+        select: { FcmToken: true },
+      });
+
+      await sendPushNotification({
+        tokens: customerSubscriptions.map((s) => s.FcmToken),
+        title: "Booking received",
+        body: `Your ${eventType.EventTypeName} booking request has been received. Booking No: ${booking.BookingNo}.`,
+        link: "/Calendar?tab=my-bookings",
+        data: {
+          bookingId: String(booking.BookingID),
+          bookingNo: booking.BookingNo,
+          status: booking.BookingStatus,
+          audience: "customer",
+        },
+      });
+    } catch (notificationError) {
+      console.error("Customer booking notification error:", notificationError);
+    }
+
+    try {
+      const adminSubscriptions = await prisma.fcmSubscriptions.findMany({
+        where: { AppRole: FcmSubscriptions_AppRole.Admin },
+        select: { FcmToken: true },
+      });
+
+      await sendPushNotification({
+        tokens: adminSubscriptions.map((s) => s.FcmToken),
+        title: "New booking request",
+        body: `${customerName} requested ${eventType.EventTypeName} (${booking.BookingNo}).`,
+        link: "/Dashboard?tab=bookings",
+        data: {
+          bookingId: String(booking.BookingID),
+          bookingNo: booking.BookingNo,
+          status: booking.BookingStatus,
+          audience: "admin",
+        },
+      });
+    } catch (notificationError) {
+      console.error("Admin notification error:", notificationError);
+    }
 
     return NextResponse.json(
       {

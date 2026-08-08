@@ -1,13 +1,3 @@
-/* ==========================================================
-   CLIENT WEBSITE STYLES
-   Used only by the public website.
-   Import this file in app/(client)/layout.tsx
-   ========================================================== */
-
-/* ============================================
-   SOUND WAVES (Pulsing Rings + Equalizer)
-   ============================================ */
-
 .sound-wave {
   position: absolute;
   inset: 0;
@@ -62,10 +52,6 @@
   }
 }
 
-/* ============================================
-   Equalizer Bars
-   ============================================ */
-
 .eq-bars {
   position: absolute;
   bottom: 10%;
@@ -118,10 +104,6 @@
   }
 }
 
-/* ============================================
-   LED Grid
-   ============================================ */
-
 .led-grid {
   position: absolute;
   inset: 0;
@@ -168,10 +150,6 @@
     transform: scale(1.2);
   }
 }
-
-/* ============================================
-   Road Show Animation
-   ============================================ */
 
 .road-effect {
   position: absolute;
@@ -245,10 +223,6 @@
   }
 }
 
-/* ============================================
-   Gradient Animation Utility
-   ============================================ */
-
 @keyframes gradient-flow {
   0% {
     background-position: 0% 50%;
@@ -267,10 +241,6 @@
   background-size: 200% auto;
   animation: gradient-flow 3s ease infinite;
 }
-
-/* ============================================
-   React Day Picker
-   ============================================ */
 
 .rdp {
   --rdp-cell-size: 52px;
@@ -344,10 +314,6 @@
 .rdp-nav_button:hover {
   background: rgba(255, 255, 255, 0.08);
 }
-
-/* ============================================
-   Booking Status
-   ============================================ */
 
 .calendar-available {
   background: rgba(39, 84, 43, 0.87) !important;

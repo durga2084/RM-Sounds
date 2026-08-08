@@ -116,6 +116,18 @@ model AdminSessions {
   @@map("AdminSessions")
 }
 
+model FcmSubscriptions {
+  SubscriptionID Int                      @id @default(autoincrement())
+  TokenHash      String                   @unique(map: "TokenHash") @db.Char(64)
+  FcmToken       String                   @db.Text
+  AppRole        FcmSubscriptions_AppRole
+  CustomerMobile String?                  @db.VarChar(20)
+  AdminLoginID   Int?
+  UserAgent      String                   @db.Text
+  CreatedAt      DateTime                 @default(now()) @db.DateTime(0)
+  UpdatedAt      DateTime?                @db.DateTime(0)
+}
+
 enum OrganizationLocations_Status {
   Active
   Inactive
@@ -143,4 +155,9 @@ enum EventCalendar_BookingAvailability {
 enum AdminLogTimings_LogStatus {
   Login
   Logout
+}
+
+enum FcmSubscriptions_AppRole {
+  Customer
+  Admin
 }

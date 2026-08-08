@@ -48,7 +48,6 @@ export default function AdminBottomNav() {
         ?.split("=")[1];
 
       if (!token) {
-        // clear local storage and redirect
         localStorage.removeItem("AdminToken");
         localStorage.removeItem("AdminUser");
         router.push("/Login");
@@ -64,11 +63,10 @@ export default function AdminBottomNav() {
       });
 
       const json = await res.json();
+      console.log("Logout response:", json);
 
-      // clear client state regardless
       localStorage.removeItem("AdminToken");
       localStorage.removeItem("AdminUser");
-      // expire cookie
       document.cookie = `token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT`;
 
       router.push("/Login");

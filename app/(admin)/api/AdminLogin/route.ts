@@ -160,7 +160,6 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Set cookie so the token is available across subdomains (www and root).
     const cookieDomain = process.env.COOKIE_DOMAIN || ".rmsounds.site";
 
     try {
@@ -173,7 +172,7 @@ export async function POST(request: NextRequest) {
         maxAge: 30 * 24 * 60 * 60,
       });
     } catch (err) {
-      // Some Next.js runtimes may not support res.cookies.set; fall back to header
+      console.warn("res.cookies.set not supported, falling back to Set-Cookie header:", err);
       const cookie = `token=${token}; Path=/; Max-Age=${30 * 24 * 60 * 60}; Domain=${cookieDomain}; SameSite=Lax; Secure`;
       res.headers.set("Set-Cookie", cookie);
     }

@@ -3,7 +3,9 @@ import { prisma } from "@/lib/prisma";
 import {
   EventBookings_Status,
   EventCalendar_BookingAvailability,
+  FcmSubscriptions_AppRole,
 } from "@prisma/client";
+import { sendPushNotification } from "@/services/PushNotificationService";
 
 function normalizeStatus(status: string): EventBookings_Status | null {
   const value = status.trim().toLowerCase();
@@ -194,6 +196,42 @@ export async function POST(request: NextRequest) {
         EventShortKey: true,
       },
     });
+
+    try {
+      const customerSubscriptions = await prisma.fcmSubscriptions.findMany({
+        where: {
+          AppRole: FcmSubscriptions_AppRole.Customer,
+          CustomerMobile: updatedBooking.MobileNumber,
+        },
+        select: { FcmToken: true },
+      });
+
+      const statusText =
+        normalizedStatus === EventBookings_Status.Accepted
+          ? "approved"
+          : normalizedStatus === EventBookings_Status.Rejected
+            ? "rejected"
+            : normalizedStatus === EventBookings_Status.Cancelled
+              ? "cancelled"
+              : normalizedStatus === EventBookings_Status.Completed
+                ? "completed"
+                : "updated";
+
+      await sendPushNotification({
+        tokens: customerSubscriptions.map((s) => s.FcmToken),
+        title: "Booking status updated",
+        body: `Your booking ${updatedBooking.BookingNo} has been ${statusText}.`,
+        link: "/Calendar?tab=my-bookings",
+        data: {
+          bookingId: String(updatedBooking.BookingID),
+          bookingNo: updatedBooking.BookingNo,
+          status: updatedBooking.BookingStatus,
+          audience: "customer",
+        },
+      });
+    } catch (notificationError) {
+      console.error("Customer notification error:", notificationError);
+    }
 
     return NextResponse.json({
       success: true,

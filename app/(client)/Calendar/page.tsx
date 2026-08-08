@@ -451,6 +451,12 @@ export default function CalendarPage() {
                     className="appearance-none rounded-2xl border border-white/10 bg-[#0B0F19] px-4 py-3 text-white outline-none transition duration-200 hover:border-white/20"
                   >
                     <option
+                      value="MobileNumber"
+                      className="bg-[#0B0F19] text-white"
+                    >
+                      Mobile Number
+                    </option>
+                    <option
                       value="BookingNo"
                       className="bg-[#0B0F19] text-white"
                     >
@@ -461,12 +467,6 @@ export default function CalendarPage() {
                       className="bg-[#0B0F19] text-white"
                     >
                       Booking ID
-                    </option>
-                    <option
-                      value="MobileNumber"
-                      className="bg-[#0B0F19] text-white"
-                    >
-                      Mobile Number
                     </option>
                   </select>
 

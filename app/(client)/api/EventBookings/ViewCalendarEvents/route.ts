@@ -1,16 +1,11 @@
-// D:\RM-Sounds\app\(client)\api\EventBookings\ViewCalendarEvents\route.ts
-
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { EventCalendar_BookingAvailability } from "@prisma/client";
 
 export async function POST(request: NextRequest) {
   try {
-    // 1️⃣ Read raw body as text to avoid JSON parse errors
     const rawBody = await request.text();
-    console.log("📦 Raw body received:", rawBody); // debug – remove after testing
 
-    // 2️⃣ If body is empty, return a clear 400 error
     if (!rawBody) {
       return NextResponse.json(
         {
@@ -21,12 +16,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 3️⃣ Parse JSON safely – catch and log the error
     let body;
     try {
       body = JSON.parse(rawBody);
     } catch (parseError) {
-      console.error("❌ Invalid JSON:", rawBody, parseError); // ✅ now using the error
+      console.error("Invalid JSON:", rawBody, parseError);
       return NextResponse.json(
         { success: false, message: "Invalid JSON format in request body." },
         { status: 400 },
@@ -35,7 +29,6 @@ export async function POST(request: NextRequest) {
 
     const { Month, Year } = body;
 
-    // 4️⃣ Validate Month and Year
     if (Month === undefined || Year === undefined) {
       return NextResponse.json(
         { success: false, message: "Month and Year are required." },
@@ -53,7 +46,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 5️⃣ Query the database
     const startOfMonth = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0));
     const endOfMonth = new Date(Date.UTC(year, month, 0, 23, 59, 59));
 
@@ -70,14 +62,12 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Build status map
     const statusMap = new Map<string, EventCalendar_BookingAvailability>();
     for (const record of records) {
       const dateStr = record.EventDate.toISOString().split("T")[0];
       statusMap.set(dateStr, record.BookingAvailability);
     }
 
-    // Build full month data
     const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
     const result = [];
 
@@ -97,7 +87,7 @@ export async function POST(request: NextRequest) {
       data: result,
     });
   } catch (error) {
-    console.error("❌ Client Calendar API Error:", error);
+    console.error("Client Calendar API Error:", error);
     return NextResponse.json(
       { success: false, message: "Failed to fetch calendar data." },
       { status: 500 },

@@ -27,12 +27,16 @@ function base64urlEncode(buffer: ArrayBuffer | Uint8Array) {
 }
 
 function base64urlDecode(input: string) {
-  const base64 = input.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat((4 - (input.length % 4)) % 4);
+  const base64 =
+    input.replace(/-/g, "+").replace(/_/g, "/") +
+    "=".repeat((4 - (input.length % 4)) % 4);
   return b64Decode(base64);
 }
 
 function arrayBufferToString(buffer: ArrayBuffer | Uint8Array) {
-  return textDecoder.decode(buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer));
+  return textDecoder.decode(
+    buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer),
+  );
 }
 
 function getSubtleCrypto(): SubtleCrypto {
@@ -63,14 +67,16 @@ function timingSafeEqual(a: string, b: string) {
   return result === 0;
 }
 
-export async function sign(payload: Record<string, any>, secret: string, expiresInSeconds = 7 * 24 * 60 * 60) {
+export async function sign(
+  payload: Record<string, unknown>,
+  secret: string,
+  expiresInSeconds = 7 * 24 * 60 * 60,
+) {
   const header = { alg: "HS256", typ: "JWT" };
   const exp = Math.floor(Date.now() / 1000) + expiresInSeconds;
   const body = { ...payload, exp };
-
   const headerB64 = base64urlEncode(textEncoder.encode(JSON.stringify(header)));
   const payloadB64 = base64urlEncode(textEncoder.encode(JSON.stringify(body)));
-
   const key = await getSigningKey(secret);
   const subtle = getSubtleCrypto();
   const signature = await subtle.sign(
@@ -79,16 +85,16 @@ export async function sign(payload: Record<string, any>, secret: string, expires
     textEncoder.encode(`${headerB64}.${payloadB64}`),
   );
   const sigB64 = base64urlEncode(signature);
-
   return `${headerB64}.${payloadB64}.${sigB64}`;
 }
 
 export async function verify(token: string, secret: string) {
   const parts = token.split(".");
-  if (parts.length !== 3) throw new Error("Invalid token format");
+  if (parts.length !== 3) {
+    throw new Error("Invalid token format");
+  }
 
   const [headerB64, payloadB64, sigB64] = parts;
-
   const key = await getSigningKey(secret);
   const subtle = getSubtleCrypto();
   const signature = await subtle.sign(
@@ -96,18 +102,20 @@ export async function verify(token: string, secret: string) {
     key,
     textEncoder.encode(`${headerB64}.${payloadB64}`),
   );
-  const expectedSigB64 = base64urlEncode(signature);
 
+  const expectedSigB64 = base64urlEncode(signature);
   if (!timingSafeEqual(expectedSigB64, sigB64)) {
     throw new Error("Invalid token signature");
   }
 
   const payloadJson = arrayBufferToString(base64urlDecode(payloadB64));
-  const payload = JSON.parse(payloadJson);
+  const payload = JSON.parse(payloadJson) as Record<string, unknown> & {
+    exp?: number;
+  };
 
   if (payload.exp && Math.floor(Date.now() / 1000) > payload.exp) {
     throw new Error("Token expired");
   }
-
+  
   return payload;
 }

@@ -21,4 +21,6 @@ CREATE TABLE `AdminLogTimings` (`LogTimingsID` INT NOT NULL AUTO_INCREMENT , `Us
 
 CREATE TABLE `AdminSessions` (`SessionID` INT NOT NULL AUTO_INCREMENT , `AdminLoginID` INT NOT NULL , `Token` TEXT NOT NULL , `DeviceInfo` VARCHAR(200) NOT NULL , `IPAddress` VARCHAR(50) NOT NULL , `IsActive` TINYINT(1) NOT NULL , `CreatedAt` DATETIME NOT NULL , `ExpiresAt` DATETIME NULL DEFAULT NULL , PRIMARY KEY (`SessionID`)) ENGINE = InnoDB;
 
+CREATE TABLE `FcmSubscriptions` (`SubscriptionID` INT(5) NOT NULL AUTO_INCREMENT , `TokenHash` CHAR(64) NOT NULL , `FcmToken` TEXT NOT NULL , `AppRole` ENUM('Customer','Admin') NOT NULL , `CustomerMobile` VARCHAR(20) NULL , `AdminLoginID` INT(5) NULL , `UserAgent` TEXT NOT NULL , `CreatedAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP , `UpdatedAt` DATETIME NULL , PRIMARY KEY (`SubscriptionID`), UNIQUE (`TokenHash`)) ENGINE = InnoDB;
+
 

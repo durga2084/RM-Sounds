@@ -1,64 +1,51 @@
-const CACHE_NAME = "rm-sounds-pwa-cache-v1";
-const urlsToCache = [
-  "/",
-  "/admin",
-  "/client",
-  "/favicon.ico",
-];
+importScripts(
+  "https://www.gstatic.com/firebasejs/12.16.0/firebase-app-compat.js",
+);
+importScripts(
+  "https://www.gstatic.com/firebasejs/12.16.0/firebase-messaging-compat.js",
+);
 
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(async (cache) => {
-      // Add each URL individually and tolerate failures so the install doesn't fail
-      await Promise.all(
-        urlsToCache.map(async (url) => {
-          try {
-            const resp = await fetch(url, { cache: "no-store" });
-            if (resp && resp.ok) {
-              await cache.put(url, resp.clone());
-            }
-          } catch (err) {
-            // ignore failed entries (they may 404 on some hosts)
-            console.warn("Service worker: failed to cache", url, err);
-          }
-        }),
-      );
-    }),
-  );
+firebase.initializeApp({
+  apiKey: "AIzaSyD2iIWjZzWwM7C7vSAsU9qklv4-3ceGbxI",
+  authDomain: "rm-sounds.firebaseapp.com",
+  projectId: "rm-sounds",
+  storageBucket: "rm-sounds.firebasestorage.app",
+  messagingSenderId: "319815354986",
+  appId: "1:319815354986:web:fa574363c351848c809813",
 });
 
-self.addEventListener("activate", (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-          return Promise.resolve();
-        }),
-      );
-    }),
-  );
+const firebaseMessaging = firebase.messaging();
+
+firebaseMessaging.onBackgroundMessage((payload) => {
+  const notification = payload.notification || {};
+  const title = notification.title || "RM Sounds";
+  const body = notification.body || "You have a new notification.";
+  const link = payload.data?.link || "/";
+  self.registration.showNotification(title, {
+    body,
+    icon: notification.icon || "/icons/client-icon-192x192.png",
+    badge: "/icons/client-icon-192x192.png",
+    data: { link },
+  });
 });
 
-self.addEventListener("fetch", (event) => {
-  if (event.request.method !== "GET") return;
-
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return (
-        response ||
-        fetch(event.request).then((fetchResponse) => {
-          const clonedResponse = fetchResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            if (fetchResponse.ok) {
-              cache.put(event.request, clonedResponse);
-            }
-          });
-          return fetchResponse;
-        })
-      );
-    }),
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const link = event.notification.data?.link || "/";
+  event.waitUntil(
+    clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((clientList) => {
+        for (const client of clientList) {
+          if ("focus" in client) {
+            client.navigate(link);
+            return client.focus();
+          }
+        }
+        if (clients.openWindow) {
+          return clients.openWindow(link);
+        }
+        return undefined;
+      }),
   );
 });
