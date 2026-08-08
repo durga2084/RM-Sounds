@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verify } from "@/services/SimpleJwt";
+import type { AdminJwtPayload } from "@/services/AuthService";
 
 export async function POST(request: NextRequest) {
   try {
@@ -43,6 +44,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const jwtPayload = payload as AdminJwtPayload;
+    const adminUsername =
+      typeof jwtPayload.AdminUsername === "string"
+        ? jwtPayload.AdminUsername
+        : "Unknown";
+
     const session = await prisma.adminSessions.findFirst({
       where: {
         Token: token,
@@ -71,7 +78,7 @@ export async function POST(request: NextRequest) {
 
     await prisma.adminLogTimings.create({
       data: {
-        UserName: payload.AdminUsername,
+        UserName: adminUsername,
         LogStatus: "Logout",
         LogoutAt: new Date(),
         CreatedAt: new Date(),
