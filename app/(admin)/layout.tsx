@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import RegisterPWA from "@/components/public/RegisterPWA";
+import PushNotificationButton from "@/components/public/PushNotificationButton";
 import AdminLayoutShell from "../../components/admin/AdminLayoutShell";
 import AdminAuthRedirect from "@/components/admin/AdminAuthRedirect";
 
@@ -17,6 +18,7 @@ export default function AdminLayout({
       <AdminAuthRedirect />
       <RegisterPWA manifestHref="/manifest-admin.webmanifest" />
       <AdminLayoutShell>{children}</AdminLayoutShell>
+      <PushNotificationButton role="Admin" />
     </>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Bell, BellOff, Loader2 } from "lucide-react";
 import { enablePushNotifications } from "@/lib/firebase-client";
 
@@ -12,25 +12,34 @@ export default function PushNotificationButton({
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  if (typeof window !== "undefined" && !("Notification" in window)) {
-    return null;
-  }
+  useEffect(() => {
+    if (!("Notification" in window)) {
+      return;
+    }
 
-  const permission =
-    typeof window !== "undefined" && "Notification" in window
-      ? Notification.permission
-      : "default";
+    if (Notification.permission === "granted") {
+      enablePushNotifications(role)
+        .then(() => {
+          console.log("FCM token registered successfully.");
+        })
+        .catch((error) => {
+          console.error("Automatic FCM registration failed:", error);
+        });
+    }
+  }, [role]);
 
-  if (permission === "granted") return null;
-
-  async function handleEnable() {
+  const registerPushToken = async () => {
     setLoading(true);
     setMessage("");
 
     try {
       await enablePushNotifications(role);
+
       setMessage("Notifications enabled.");
-      window.setTimeout(() => setMessage(""), 3000);
+
+      window.setTimeout(() => {
+        setMessage("");
+      }, 3000);
     } catch (error) {
       setMessage(
         error instanceof Error
@@ -40,13 +49,22 @@ export default function PushNotificationButton({
     } finally {
       setLoading(false);
     }
+  };
+
+  if (typeof window !== "undefined" && !("Notification" in window)) {
+    return null;
   }
+
+  const permission =
+    typeof window !== "undefined" && "Notification" in window
+      ? Notification.permission
+      : "default";
 
   return (
     <div className="fixed bottom-24 right-4 z-[9998] max-w-xs">
       <button
         type="button"
-        onClick={handleEnable}
+        onClick={registerPushToken}
         disabled={loading}
         className="flex items-center gap-2 rounded-full bg-white px-4 py-3 text-sm font-semibold text-[#0B0F19] shadow-2xl transition hover:scale-[1.02] disabled:opacity-60"
       >
@@ -57,6 +75,7 @@ export default function PushNotificationButton({
         ) : (
           <Bell className="h-4 w-4" />
         )}
+
         {permission === "denied"
           ? "Allow notifications in browser settings"
           : "Enable notifications"}
