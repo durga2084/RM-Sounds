@@ -42,40 +42,52 @@ export default function AdminBottomNav() {
 
   const handleLogout = async () => {
     try {
-      const token = document.cookie
+      const cookieToken = document.cookie
         .split("; ")
-        .find((c) => c.startsWith("token="))
-        ?.split("=")[1];
+        .find((cookie) => cookie.startsWith("token="))
+        ?.split("=")
+        .slice(1)
+        .join("=");
 
-      if (!token) {
-        localStorage.removeItem("AdminToken");
-        localStorage.removeItem("AdminUser");
-        router.push("/Login");
-        return;
+      const localToken = localStorage.getItem("AdminToken");
+      const token = cookieToken
+        ? decodeURIComponent(cookieToken)
+        : localToken || "";
+
+      if (token) {
+        try {
+          const response = await fetch(AdminAuthAPI.Logout, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+            cache: "no-store",
+          });
+
+          const result = await response.json().catch(() => null);
+
+          if (!response.ok || !result?.success) {
+            console.warn("Logout API response:", result);
+          }
+        } catch (error) {
+          console.error("Logout API error:", error);
+        }
       }
-
-      const res = await fetch(AdminAuthAPI.Logout, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      const json = await res.json();
-      console.log("Logout response:", json);
-
+    } finally {
       localStorage.removeItem("AdminToken");
       localStorage.removeItem("AdminUser");
-      document.cookie = `token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT`;
 
-      router.push("/Login");
-    } catch (err) {
-      console.error("Logout error", err);
-      localStorage.removeItem("AdminToken");
-      localStorage.removeItem("AdminUser");
-      document.cookie = `token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT`;
-      router.push("/Login");
+      const cookieDomain = ".rmsounds.site";
+
+      document.cookie = `token=; Path=/; Domain=${cookieDomain}; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax; Secure`;
+
+      document.cookie =
+        "token=; Path=/; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax; Secure";
+
+      router.replace("/Login");
+      router.refresh();
     }
   };
 
